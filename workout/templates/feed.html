@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+    {% for post in posts %}
+        {% for follow in following %}
+            {% for user in users %}
+                {% if post.author.id == follow.user_id %}
+                    {% if user.id == post.author.id %}
+                    <article class="media content-section">
+                        <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}">
+                        <div class="media-body">
+                            <div class="article-metadata">
+                                {% if current_user.id == post.author.id %}
+                                    <a class="mr-2" href="{{ url_for('account') }}">{{ post.author.username }}</a>
+                                {% else %}
+                                    <a class="mr-2" href="{{ url_for('foreign_account', user_id=post.author.id) }}">{{ post.author.username }}</a>
+                                {% endif %}
+                                {% if post.date_posted.strftime('%Y-%m-%d') == today_date.strftime('%Y-%m-%d') %}
+                                    <small class="text-muted">Today</small>
+                                {% else %}
+                                    <small class="text-muted">{{ post.date_posted.strftime('%m-%d-%Y') }}</small>
+                                {% endif %}
+                            </div>
+                            <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
+                            <p class="article-content">{{ post.content }}</p>
+                            {% if post.comments %}
+                                <small class="text-muted">Comments from {{ post.author.username }}:</small></br>
+                            {% endif %}
+                            <small class="text-muted">{{ post.comments }}</small>
+                        </div>
+                    </article>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+{% endblock content %}

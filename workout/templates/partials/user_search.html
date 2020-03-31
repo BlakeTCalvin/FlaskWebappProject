@@ -1,0 +1,18 @@
+{% if no_users %}
+<h6 class="dropdown-item no-users" style="color: #9a9da0;">No Users Found..</h6>
+{% else %}
+    {% for user in users %}
+    <a class="nav-link dropdown-item media" href="{{ url_for('foreign_account', user_id=user.id) }}">
+        <img class="rounded-circle mini-img" src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}" style="text-align: center; margin-right: 5px; margin-top: 3px;">
+        {% if (user.username|length + user.first_name|length + user.last_name|length) < 30 %}
+        <h6 class="mr-auto" style="text-align: center; margin-bottom: 0; color: #9a9da0; line-height: 32px;">{{ user.username }}</h6>
+        <small class="text-muted" style="text-align: center; line-height: 35px;">{{ user.first_name }} {{ user.last_name }}</small>
+        {% elif (user.username|length + user.first_name|length) < 30 %}
+        <h6 class="mr-auto" style="text-align: center; margin-bottom: 0; color: #9a9da0; line-height: 32px;">{{ user.username }}</h6>
+        <small class="text-muted" style="text-align: center; line-height: 35px;">{{ user.first_name }}</small>
+        {% else %}
+        <h6 class="mr-auto" style="text-align: center; margin-bottom: 0; color: #9a9da0; line-height: 32px;">{{ user.username }}</h6>
+        {% endif %}
+    </a>
+    {% endfor %}
+{% endif %}

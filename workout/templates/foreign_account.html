@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h2>Account Information</h2>
+    <div class="content-section">
+        <div class="row">
+            <div class="media col-lg-10">
+                <img class="rounded-circle account-img" src="{{ image_file }}">
+                <div class="media-body ml-3">
+                    {% if name_length > 14 %}
+                    <h4 class="mb-3">{{ user.username }}</h4>
+                    {% else %}
+                    <h2 class="account-heading mb-3">{{ user.username }}</h2>
+                    {% endif %}
+                    <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#followerModal">
+                        {{ follower_count }} Followers
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#followingModal">
+                        {{ follow_count }} Following
+                    </button>
+                    <p class="mt-2 mb-2 text-secondary">{{ user.first_name }} {{ user.last_name }}</p>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                {% if already_following %}
+                <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#unfollowModal">
+                    Unfollow
+                </button>
+                {% else %}
+                <form action="/follow/user/{{ user.id }}" method="post" style="float: right;">
+                    <input class="btn btn-info" type="submit" value="Follow">
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <h2 style="margin-top: 50px;">Posts</h2>
+    {% if posts.items %}
+        {% for post in posts.items %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        {% if post.date_posted.strftime('%Y-%m-%d') == today_date.strftime('%Y-%m-%d') %}
+                            <small class="text-muted">Today</small>
+                        {% else %}
+                            <small class="text-muted">{{ post.date_posted.strftime('%m-%d-%Y') }}</small>
+                        {% endif %}
+                    </div>
+                    <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
+                    <p class="article-content">{{ post.content }}</p>
+                    {% if post.comments %}
+                        <small class="text-muted">Comments from {{ post.author.username }}:</small></br>
+                    {% endif %}
+                    <small class="text-muted">{{ post.comments }}</small>
+                </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        <article class="media content-section">
+            <div class="media-body">
+                <h3 class="text-muted m-3">This user has no posts yet :(</h3>
+            </div>
+        </article>
+    {% endif %}
+    {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+            {% if posts.page == page_num %}
+                <a class="btn btn-info mb-4" href="{{ url_for('foreign_account', user_id=user.id, page=page_num) }}">{{ page_num }}</a> 
+            {% else %}
+                <a class="btn btn-outline-info mb-4" href="{{ url_for('foreign_account', user_id=user.id, page=page_num) }}">{{ page_num }}</a> 
+            {% endif %} 
+        {% else %}
+            ...
+        {% endif %}
+    {% endfor %}
+    <!-- Modals For Followers and Following -->
+    <!-- Follower Modal -->
+    <div class="modal fade" id="followerModal" tabindex="-1" role="dialog" aria-labelledby="followerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followerModalLabel">Followers - {{ follower_count }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% for i in follower_list %}
+                    <a class="media mb-1" href="{{ url_for('foreign_account', user_id=i.id) }}" style="text-decoration: none;">
+                        <img class="rounded-circle mini-img" src="{{ url_for('static', filename='profile_pics/' + i.image_file) }}" style="text-align: center; margin-right: 5px; margin-top: 3px;">
+                        <h6 class="mr-auto" style="text-align: center; margin-bottom: 0; color: #9a9da0; line-height: 32px;">{{ i.username }}</h6>
+                        <small class="text-muted" style="text-align: center; line-height: 35px;">{{ i.first_name }} {{ i.last_name }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Following Modal -->
+    <div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followingModalLabel">Following - {{ follow_count }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% for i in following_list %}
+                    <a class="media mb-1" href="{{ url_for('foreign_account', user_id=i.id) }}" style="text-decoration: none;">
+                        <img class="rounded-circle mini-img" src="{{ url_for('static', filename='profile_pics/' + i.image_file) }}" style="text-align: center; margin-right: 5px; margin-top: 3px;">
+                        <h6 class="mr-auto" style="text-align: center; margin-bottom: 0; color: #9a9da0; line-height: 32px;">{{ i.username }}</h6>
+                        <small class="text-muted" style="text-align: center; line-height: 35px;">{{ i.first_name }} {{ i.last_name }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Unfollow Modal -->
+    <div class="modal fade" id="unfollowModal" tabindex="-1" role="dialog" aria-labelledby="unfollowModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img class="rounded-circle account-img mx-auto d-block" src="{{ image_file }}">
+                    <p class="text-center">Are you sure you'd like to unfollow {{ user.username }}?</p>
+                </div>
+                <form action="/unfollow/user/{{ user.id }}" method="post" style="float: right;">
+                    <input class="btn btn-danger" type="submit" value="Unfollow" style="width: 100%; border-radius: 0;">
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 0;">Close</button>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

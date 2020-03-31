@@ -1,0 +1,14 @@
+{% if found == True %}
+    {% if current_user.username == check_username.username %}
+    <p style="color: #d4962b">You already own this username.</p>
+    {% else %}
+    <p style="color: red">That username has been taken.</p>
+    {% endif %}
+{% endif %}
+{% if too_short == True %}
+<p style="color: red">That username is too short.</p>
+{% elif too_long == True %}
+<p style="color: red">That username is too long.</p>
+{% elif found == False %}
+<p style="color: green">That username is available.</p>
+{% endif %}
